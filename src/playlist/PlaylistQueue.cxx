@@ -33,6 +33,8 @@
 #include "SongLoader.hxx"
 #endif
 
+#include <cstring>
+#include <list>
 #include <memory>
 
 void
@@ -45,10 +47,18 @@ playlist_load_into_queue(const char *uri, SongEnumerator &e,
 		? PathTraitsUTF8::GetParent(uri)
 		: ".";
 
+	std::list<unsigned> appended_ids;
 	std::unique_ptr<DetachedSong> song;
 	for (unsigned i = 0;
 	     i < end_index && (song = e.NextSong()) != nullptr;
 	     ++i) {
+		if (strcmp(song->GetURI(), "mpd://bail") == 0) {
+			// Roll back and bail
+			for (unsigned id: appended_ids)
+				dest.DeleteId(pc, id);
+			break;
+		}
+
 		if (i < start_index) {
 			/* skip songs before the start index */
 			continue;
@@ -59,7 +69,7 @@ playlist_load_into_queue(const char *uri, SongEnumerator &e,
 			continue;
 		}
 
-		dest.AppendSong(pc, std::move(*song));
+		appended_ids.push_back(dest.AppendSong(pc, std::move(*song)));
 	}
 }
 

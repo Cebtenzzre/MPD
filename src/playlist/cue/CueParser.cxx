@@ -254,7 +254,15 @@ CueParser::Feed(StringView src) noexcept
 
 	} else if (state == IGNORE_TRACK) {
 		return;
-	} else if (state == TRACK && command.Equals("INDEX")) {
+	} else if (command.Equals("INDEX")) {
+		if (state != TRACK) {
+			state = IGNORE_FILE;
+			finished.reset();
+			finished = std::make_unique<DetachedSong>("mpd://bail");
+			end = true;
+			return;
+		}
+
 		if (ignore_index)
 			return;
 

@@ -129,7 +129,7 @@ private:
 	}
 #endif
 
-	void UpdatePlaylistFile(Directory &directory,
+	void UpdatePlaylistFile(Directory &parent, Directory *directory,
 				SongEnumerator &contents) noexcept;
 
 	void UpdatePlaylistFile(Directory &parent, std::string_view name,
@@ -141,12 +141,14 @@ private:
 				const StorageFileInfo &info) noexcept;
 
 	bool UpdateRegularFile(Directory &directory,
-			       const char *name, const StorageFileInfo &info) noexcept;
+			       const char *name, const StorageFileInfo &info,
+			       bool playlist) noexcept;
 
 	void UpdateDirectoryChild(Directory &directory,
 				  const ExcludeList &exclude_list,
 				  const char *name,
-				  const StorageFileInfo &info) noexcept;
+				  const StorageFileInfo &info,
+				  bool playlist) noexcept;
 
 	bool UpdateDirectory(Directory &directory,
 			     const ExcludeList &exclude_list,
