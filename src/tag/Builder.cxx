@@ -40,7 +40,7 @@ TagBuilder::TagBuilder(const Tag &other) noexcept
 	if (n > 0) {
 		const std::lock_guard<Mutex> protect(tag_pool_lock);
 		for (std::size_t i = 0; i != n; ++i)
-			items.push_back(tag_pool_dup_item(other.items[i]));
+			items.push_back(tag_pool_dup_item(other.Get(i)));
 	}
 }
 
@@ -51,7 +51,8 @@ TagBuilder::TagBuilder(Tag &&other) noexcept
 	   need to contact the tag pool, because all we do is move
 	   references */
 	items.reserve(other.num_items);
-	std::copy_n(other.items, other.num_items, std::back_inserter(items));
+	for (unsigned i = 0, n = other.num_items; i != n; ++i)
+		items.push_back(other.Get(i));
 
 	/* discard the pointers from the Tag object */
 	other.num_items = 0;
@@ -101,12 +102,15 @@ TagBuilder::operator=(Tag &&other) noexcept
 	duration = other.duration;
 	has_playlist = other.has_playlist;
 
+	assert(items.empty() && "Would have dropped tags without freeing them");
+
 	/* move all TagItem pointers from the Tag object; we don't
 	   need to contact the tag pool, because all we do is move
 	   references */
 	RemoveAll();
 	items.reserve(other.num_items);
-	std::copy_n(other.items, other.num_items, std::back_inserter(items));
+	for (unsigned i = 0, n = other.num_items; i != n; ++i)
+		items.push_back(other.Get(i));
 
 	/* discard the pointers from the Tag object */
 	other.num_items = 0;
@@ -190,7 +194,7 @@ TagBuilder::Complement(const Tag &other) noexcept
 	if (n > 0) {
 		const std::lock_guard<Mutex> protect(tag_pool_lock);
 		for (std::size_t i = 0; i != n; ++i) {
-			TagItem *item = other.items[i];
+			TagItem *item = other.Get(i);
 			if (!present[item->type])
 				items.push_back(tag_pool_dup_item(item));
 		}

@@ -23,6 +23,15 @@
 
 #include <cassert>
 
+TagItem *
+Tag::Get(size_t i) const noexcept
+{
+	assert(i < num_items);
+	const auto item = items[i];
+	assert(blacklist.find(item) == blacklist.end());
+	return item;
+}
+
 void
 Tag::Clear() noexcept
 {

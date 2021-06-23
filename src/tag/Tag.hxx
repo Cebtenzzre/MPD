@@ -105,6 +105,8 @@ struct Tag {
 		return !IsEmpty() || !duration.IsNegative();
 	}
 
+	TagItem *Get(size_t i) const noexcept;
+
 	/**
 	 * Clear everything, as if this was a new Tag object.
 	 */

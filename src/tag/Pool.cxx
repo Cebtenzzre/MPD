@@ -32,6 +32,8 @@
 
 Mutex tag_pool_lock;
 
+std::set<TagItem *> blacklist;
+
 static constexpr size_t NUM_SLOTS = 16127;
 
 struct TagPoolSlot {
@@ -124,12 +126,14 @@ tag_pool_get_item(TagType type, StringView value) noexcept
 
 	auto slot = TagPoolSlot::Create(*slot_p, type, value);
 	*slot_p = slot;
+	blacklist.erase(&slot->item);
 	return &slot->item;
 }
 
 TagItem *
 tag_pool_dup_item(TagItem *item) noexcept
 {
+	assert(blacklist.find(item) == blacklist.end());
 	TagPoolSlot *slot = tag_item_to_slot(item);
 
 	assert(slot->ref > 0);
@@ -156,6 +160,8 @@ tag_pool_put_item(TagItem *item) noexcept
 
 	if (slot->ref > 0)
 		return;
+
+	blacklist.insert(item);
 
 	for (slot_p = tag_value_slot_p(item->type, item->value);
 	     *slot_p != slot;

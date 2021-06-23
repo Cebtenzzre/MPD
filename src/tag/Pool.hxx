@@ -23,6 +23,8 @@
 #include "Type.h"
 #include "thread/Mutex.hxx"
 
+#include <set>
+
 extern Mutex tag_pool_lock;
 
 struct TagItem;
@@ -38,5 +40,7 @@ tag_pool_dup_item(TagItem *item) noexcept;
 
 void
 tag_pool_put_item(TagItem *item) noexcept;
+
+extern std::set<TagItem *> blacklist;
 
 #endif
